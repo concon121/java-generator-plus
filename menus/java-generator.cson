@@ -1,0 +1,50 @@
+# See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
+'context-menu':
+  'atom-text-editor': [
+    label: 'Java Generator',
+    submenu: [
+      {
+        'label': 'Getters'
+        'command': 'java-generator:generate-getters'
+      },
+      {
+        'label': 'Setters'
+        'command': 'java-generator:generate-setters'
+      },
+      {
+        'label': 'Constructor'
+        'command': 'java-generator:generate-constructor'
+      },
+      {
+        'label': 'toString'
+        'command': 'java-generator:generate-to-string'
+      }
+    ]
+  ]
+
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Java Generator'
+      'submenu': [
+        {
+          'label': 'Getters'
+          'command': 'java-generator:generate-getters'
+        },
+        {
+          'label': 'Setters'
+          'command': 'java-generator:generate-setters'
+        },
+        {
+          'label': 'Constructor'
+          'command': 'java-generator:generate-constructor'
+        },
+        {
+          'label': 'toString'
+          'command': 'java-generator:generate-to-string'
+        }
+      ]
+    ]
+  }
+]
