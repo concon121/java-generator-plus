@@ -6,10 +6,10 @@
   "description": "Generates getter/setter, toString, and constructor methods.",
   "repository": {
       "type": "git",
-      "url": "url here"
+      "url": "https://github.com/delebota/java-generator"
   },
   "bugs": {
-      "url": "url here"
+      "url": "https://github.com/delebota/java-generator/issues"
   },
   "license": "Apache 2.0",
   "author": {

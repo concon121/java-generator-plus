@@ -1,3 +1,3 @@
 # Java Generator
 
-A package created to generate getter, setter, constructor, and toString methods for java classes.
+An Atom.io package created to generate getter, setter, constructor, and toString methods for java classes.
