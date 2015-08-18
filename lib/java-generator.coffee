@@ -1,28 +1,25 @@
-JavaGeneratorView = require './java-generator-view'
 {CompositeDisposable} = require 'atom'
 
-module.exports = JavaGenerator =
-  javaGeneratorView: null
-  modalPanel: null
-  subscriptions: null
+module.exports =
+    activate: ->
+        # Register commands
+        atom.commands.add 'atom-workspace', 'java-generator:generate-getters', => @generateGetters()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-setters', => @generateSetters()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
 
-  activate: (state) ->
-    @javaGeneratorView = new JavaGeneratorView(state.javaGeneratorViewState)
-    @modalPanel = atom.workspace.addModalPanel(item: @javaGeneratorView.getElement(), visible: false)
+    generateGetters: ->
+        editor = atom.workspace.getActivePaneItem()
+        editor.insertText('\nA Getter Goes Here!\n')
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    @subscriptions = new CompositeDisposable
+    generateSetters: ->
+        editor = atom.workspace.getActivePaneItem()
+        editor.insertText('\nA Setter Goes Here!\n')
 
-    # Register commands
-    @subscriptions.add atom.commands.add 'atom-workspace', 'java-generator:generate-getters': => @generateGetters()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'java-generator:generate-setters': => @generateSetters()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'java-generator:generate-constructor': => @generateConstructor()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'java-generator:generate-to-string': => @generateToString()
+    generateConstructor: ->
+        editor = atom.workspace.getActivePaneItem()
+        editor.insertText('\nA Constructor Goes Here!\n')
 
-  deactivate: ->
-    @modalPanel.destroy()
-    @subscriptions.dispose()
-    @javaGeneratorView.destroy()
-
-  serialize: ->
-    javaGeneratorViewState: @javaGeneratorView.serialize()
+    generateToString: ->
+        editor = atom.workspace.getActivePaneItem()
+        editor.insertText('\nA toString Goes Here!\n')
