@@ -1,4 +1,5 @@
-{CompositeDisposable} = require 'atom'
+Command = require './command'
+Parser = require './parser'
 
 module.exports =
     activate: ->
@@ -8,9 +9,26 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
 
+    parseData: ->
+        cmd = new Command()
+        parser = new Parser()
+
+        parser.setContent(cmd.getEditorText())
+
+        #return {
+        #    vars: parser.getVars(),
+        #    funcs: parser.getFuncs()
+        #}
+
+        return parser.getVars()
+
     generateGetters: ->
-        editor = atom.workspace.getActivePaneItem()
-        editor.insertText('\nA Getter Goes Here!\n')
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseData()
 
     generateSetters: ->
         editor = atom.workspace.getActivePaneItem()
