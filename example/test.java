@@ -1,12 +1,14 @@
-public class HelloWorld {
+package com.test;
 
-    public String phrase = "Hello, World!";
-    public List<String> list = new ArrayList<String>();
-    private static int a;
-    protected static final int b = 1;
-    private static volatile List<String> testVariable;
+import java.util.List;
 
-    public void run() {
-        System.out.println(phrase);
-    }
+public class TestClass {
+
+    public int a;
+    private int b;
+    private final int c = 1;
+    protected static List<String> list;
+    private static volatile int test;
+    private transient int test2;
+
 }
