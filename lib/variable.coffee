@@ -4,13 +4,15 @@ class Variable
     capitalizedName: ' '
     type: ' '
     isStatic: false
+    isFinal: false
 
-    #TODO - static/final/transient/volatile
-    constructor: (name, type, isStatic) ->
+    #TODO - transient/volatile
+    constructor: (name, type, isStatic, isFinal) ->
         @name = name
         @capitalizedName = name.charAt(0).toUpperCase() + name.substring(1, name.length)
         @type = type
         @isStatic = isStatic
+        @isFinal = isFinal
 
     getName: ->
         return @name
@@ -30,8 +32,14 @@ class Variable
     setIsStatic: (value) ->
         @isStatic = value
 
+    getIsFinal: ->
+        return @isFinal
+
+    setIsFinal: (value) ->
+        @isFinal = value
+
     getCapitalizedName: ->
         return @capitalizedName
 
     toString: ->
-        return "Name: " + @name + " - " + "Type: " + @type + " - " + "isStatic: " + @isStatic
+        return "Name: " + @name + " - " + "Type: " + @type + " - " + "isStatic: " + @isStatic + " - " + "isFinal: " + @isFinal

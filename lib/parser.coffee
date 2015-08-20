@@ -7,7 +7,7 @@ class Parser
     methodRegex: /\(([a-zA-Z0-9_$\<\>\.\s]+)?\)/
     classNameRegex: /(?:class)\s+([a-zA-Z0-9_$]+)/
     classRegex: /class/
-    finalRegex: /final/
+    finalRegex: /^final$/
     staticRegex: /^static$/
     content: ''
 
@@ -16,7 +16,7 @@ class Parser
     getContent: ->
         return @content
 
-    getAllVars:  ->
+    getVars: ->
         varLines = @content.match(@varRegexArray)
 
         if ! varLines
@@ -30,34 +30,15 @@ class Parser
                 group = @varRegex.exec(line)
                 if group != null
                     isStatic = false
+                    isFinal = false
 
                     if group[2] != null && @staticRegex.test(group[2])
                         isStatic = true
 
-                    variable = new Variable(group[6], group[5], isStatic)
-                    variables.push (variable)
+                    if group[3] != null && @finalRegex.test(group[3])
+                        isFinal = true
 
-        return variables
-
-    getNonFinalVars:  ->
-        varLines = @content.match(@varRegexArray)
-
-        if ! varLines
-            alert ('No variables were found.')
-            return {}
-
-        variables = []
-        for line in varLines
-            # Skip method and class declarations
-            if ! @methodRegex.test(line) && ! @classRegex.test(line) && ! @finalRegex.test(line)
-                group = @varRegex.exec(line)
-                if group != null
-                    isStatic = false
-
-                    if group[2] != null && @staticRegex.test(group[2])
-                        isStatic = true
-
-                    variable = new Variable(group[6], group[5], isStatic)
+                    variable = new Variable(group[6], group[5], isStatic, isFinal)
                     variables.push (variable)
 
         return variables

@@ -10,5 +10,5 @@ public class TestClass {
     protected static List<String> list;
     private static volatile int test;
     private transient int test2;
-
+    
 }

@@ -9,16 +9,34 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
 
-    parseVars: (removeFinalVars) ->
+    parseVars: (removeFinalVars, removeStaticVars) ->
         cmd = new Command()
         parser = new Parser()
 
         parser.setContent(cmd.getEditorText())
 
+        data = parser.getVars()
+
+        # Remove Final Variables, iterate in reverse so we don't skip records on splice
         if removeFinalVars
-            return parser.getNonFinalVars()
-        else
-            return parser.getAllVars()
+            i = data.length - 1
+            while i >= 0
+                variable = data[i]
+                if variable.getIsFinal()
+                    data.splice(i, 1)
+                i--
+
+        # Remove Static Variables, iterate in reverse so we don't skip records on splice
+        if removeStaticVars
+            i = data.length - 1
+            while i >= 0
+                variable = data[i]
+                if variable.getIsStatic()
+                    data.splice(i, 1)
+                i--
+
+
+        return data
 
     createGetter: (variable) ->
         code = "\n\tpublic "
@@ -62,19 +80,49 @@ module.exports =
         counter = 0;
         size = data.length
         for variable in data
-            if ! variable.getIsStatic()
-                name = variable.getName()
-                code += name + "=\" + " + name + " + \""
+            name = variable.getName()
+            code += name + "=\" + " + name + " + \""
 
-                if counter + 1 < size
-                    code += ", "
-                else
-                    code += "]\";\n\t}\n"
+            if counter + 1 < size
+                code += ", "
+            else
+                code += "]\";\n\t}\n"
 
             counter++
 
-        if /, $/.test(code)
-            code = code.substring(0, code.length - 2) + "]\";\n\t}\n"
+        return code
+
+    createConstructor: (data) ->
+        cmd = new Command()
+        parser = new Parser()
+        parser.setContent(cmd.getEditorText())
+        className = parser.getClassName()
+
+        # First, an empty one
+        code = "\n\tpublic " + className + "() {\n\t\tsuper();\n\t}\n"
+
+        # Second, one with all variables
+        code += "\n\tpublic " + className + "("
+
+        # add params
+        counter = 0
+        size = data.length
+        for variable in data
+            code += variable.getType() + " " + variable.getName()
+            if counter + 1 < size
+                code += ", "
+            else
+                code += ")"
+
+            counter++
+
+        code += " {\n\t\tsuper();"
+
+        # Add assignments
+        for variable in data
+            code += "\n\t\tthis." + variable.getName() + " = " + variable.getName() + ";"
+
+        code += "\n\t}\n"
 
         return code
 
@@ -84,7 +132,7 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseVars(false)
+        data = @parseVars(false, false)
 
         for variable in data
             code = @createGetter(variable)
@@ -97,16 +145,12 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseVars(true)
+        data = @parseVars(true, false)
 
         for variable in data
             code = @createSetter(variable)
             cmd = new Command()
             cmd.insertAtEndOfFile(code)
-
-    generateConstructor: ->
-        editor = atom.workspace.getActivePaneItem()
-        editor.insertText('\nA Constructor Goes Here!\n')
 
     generateToString: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -114,8 +158,20 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseVars(false)
+        data = @parseVars(false, true)
 
         code = @createToString(data)
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
+
+    generateConstructor: ->
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true, true)
+
+        code = @createConstructor(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
