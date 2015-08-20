@@ -6,6 +6,7 @@ class Parser
     varRegex: /(public|private|protected)\s*(static)?\s*(final)?\s*(volatile|transient)?\s*([a-zA-Z0-9_$\<\>]+)\s*([a-zA-Z0-9_$]+)(\(.*\))?/
     methodRegex: /\(([a-zA-Z0-9_$\<\>\.\s]+)?\)/
     classRegex: /class/
+    finalRegex: /final/
     content: ''
 
     setContent: (@content) ->
@@ -13,7 +14,7 @@ class Parser
     getContent: ->
         return @content
 
-    getVars: ->
+    getAllVars:  ->
         varLines = @content.match(@varRegexArray)
 
         if ! varLines
@@ -29,5 +30,22 @@ class Parser
                   variable = new Variable(group[6], group[5])
                   variables.push (variable)
 
-        alert ("variables: " + variables.toString())
+        return variables
+
+    getNonFinalVars:  ->
+        varLines = @content.match(@varRegexArray)
+
+        if ! varLines
+            alert ('No variables were found.')
+            return {}
+
+        variables = []
+        for line in varLines
+            # Skip method and class declarations
+            if ! @methodRegex.test(line) && ! @classRegex.test(line) && ! @finalRegex.test(line)
+                group = @varRegex.exec(line)
+                if group != null
+                  variable = new Variable(group[6], group[5])
+                  variables.push (variable)
+
         return variables

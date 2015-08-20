@@ -9,13 +9,22 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
 
-    parseVars: ->
+    parseVars: (removeFinalVars) ->
         cmd = new Command()
         parser = new Parser()
 
         parser.setContent(cmd.getEditorText())
 
-        return parser.getVars()
+        if removeFinalVars
+            return parser.getNonFinalVars()
+        else
+            return parser.getAllVars()
+
+    createGetter: (variable) ->
+        return "\n\tpublic " + variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn this." + variable.getName() + ";\n\t}\n"
+
+    createSetter: (variable) ->
+        return "\n\tpublic void set" + variable.getCapitalizedName() + "(" + variable.getType() + " " + variable.getName() + ") {\n\t\tthis." + variable.getName() + " = " + variable.getName() + ";\n\t}\n"
 
     generateGetters: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -23,11 +32,25 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseVars()
+        data = @parseVars(false)
+
+        for variable in data
+            code = @createGetter(variable)
+            cmd = new Command()
+            cmd.insertAtEndOfFile(code)
 
     generateSetters: ->
-        editor = atom.workspace.getActivePaneItem()
-        editor.insertText('\nA Setter Goes Here!\n')
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true)
+
+        for variable in data
+            code = @createSetter(variable)
+            cmd = new Command()
+            cmd.insertAtEndOfFile(code)
 
     generateConstructor: ->
         editor = atom.workspace.getActivePaneItem()

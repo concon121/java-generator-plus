@@ -5,18 +5,8 @@ public class HelloWorld {
     private static int a;
     protected static final int b = 1;
     private static volatile List<String> testVariable;
-    private String dontGenThisOne;
 
     public void run() {
         System.out.println(phrase);
     }
-
-    public String getDontGenThisOne() {
-        return this.dontGenThisOne;
-    }
-
-    public void setDontGenThisOne(String dontGenThisOne) {
-        this.dontGenThisOne = dontGenThisOne;
-    }
-
 }

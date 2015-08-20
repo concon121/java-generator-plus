@@ -7,8 +7,7 @@ class Variable
     #TODO - static/final/transient/volatile
     constructor: (name, type) ->
         @name = name
-        @capitalizedName = name
-        @capitalizedName.charAt(0).toUpperCase()
+        @capitalizedName = name.charAt(0).toUpperCase() + name.substring(1, name.length)
         @type = type
 
     getName: ->
