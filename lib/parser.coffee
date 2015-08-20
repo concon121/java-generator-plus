@@ -4,7 +4,7 @@ module.exports =
 class Parser
     varRegexArray: /(public|private|protected)\s*(static)?\s*(final)?\s*(volatile|transient)?\s*([a-zA-Z0-9_$\<\>]+)\s*([a-zA-Z0-9_$]+)(\(.*\))?/g
     varRegex: /(public|private|protected)\s*(static)?\s*(final)?\s*(volatile|transient)?\s*([a-zA-Z0-9_$\<\>]+)\s*([a-zA-Z0-9_$]+)(\(.*\))?/
-    methodRegex: /\(([a-zA-Z0-9_$\<\>\.\s]+)?\)/
+    methodRegex: /\(([a-zA-Z0-9_$\<\>\.\,\s]+)?\)/
     classNameRegex: /(?:class)\s+([a-zA-Z0-9_$]+)/
     classRegex: /class/
     finalRegex: /^final$/
