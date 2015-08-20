@@ -3,7 +3,7 @@
   "main": "./lib/java-generator",
   "version": "1.0.0",
   "private": true,
-  "description": "Generates getter/setter, toString, and constructor methods.",
+  "description": "Generates getter, setter, toString, and constructor methods for java classes.",
   "repository": {
       "type": "git",
       "url": "https://github.com/delebota/java-generator"

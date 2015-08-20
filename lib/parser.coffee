@@ -1,6 +1,12 @@
+Variable = require './variable'
+
 module.exports =
 class Parser
-    content : ''
+    varRegexArray: /(public|private|protected)\s*(static)?\s*(final)?\s*(volatile|transient)?\s*([a-zA-Z0-9_$\<\>]+)\s*([a-zA-Z0-9_$]+)(\(.*\))?/g
+    varRegex: /(public|private|protected)\s*(static)?\s*(final)?\s*(volatile|transient)?\s*([a-zA-Z0-9_$\<\>]+)\s*([a-zA-Z0-9_$]+)(\(.*\))?/
+    methodRegex: /\(([a-zA-Z0-9_$\<\>\.\s]+)?\)/
+    classRegex: /class/
+    content: ''
 
     setContent: (@content) ->
 
@@ -8,16 +14,20 @@ class Parser
         return @content
 
     getVars: ->
-        varLines = @getContent().match(/\s*(public|private|protected)\s*(static)?\s*(final)?/g)
-        alert ("varLines: " + varLines.toString())
+        varLines = @content.match(@varRegexArray)
 
         if ! varLines
             alert ('No variables were found.')
             return {}
 
-        lines = []
+        variables = []
         for line in varLines
-            #variables.push (@processVarLine(line))
-            lines.push (line)
+            # Skip method and class declarations
+            if ! @methodRegex.test(line) && ! @classRegex.test(line)
+                group = @varRegex.exec(line)
+                if group != null
+                  variable = new Variable(group[6], group[5])
+                  variables.push (variable)
 
-        return lines
+        alert ("variables: " + variables.toString())
+        return variables

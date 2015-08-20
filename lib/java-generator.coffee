@@ -9,16 +9,11 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
 
-    parseData: ->
+    parseVars: ->
         cmd = new Command()
         parser = new Parser()
 
         parser.setContent(cmd.getEditorText())
-
-        #return {
-        #    vars: parser.getVars(),
-        #    funcs: parser.getFuncs()
-        #}
 
         return parser.getVars()
 
@@ -28,7 +23,7 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseData()
+        data = @parseVars()
 
     generateSetters: ->
         editor = atom.workspace.getActivePaneItem()
