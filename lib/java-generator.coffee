@@ -9,6 +9,7 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
         atom.commands.add 'atom-workspace', 'java-generator:generate-builder', => @generateBuilder()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-getters-setters', => @generateGettersAndSetters()
 
     parseVars: (removeFinalVars, removeStaticVars) ->
         cmd = new Command()
@@ -66,6 +67,12 @@ module.exports =
             code += "this."
 
         code += variable.getName() + " = " + variable.getName() + ";\n\t}\n"
+
+        return code
+
+    createGetterAndSetter: (variable) ->
+        code  = @createGetter(variable)
+        code += @createSetter(variable)
 
         return code
 
@@ -217,3 +224,16 @@ module.exports =
         code = @createBuilder(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
+
+    generateGettersAndSetters: ->
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true, true)
+
+        for variable in data
+            code = @createGetterAndSetter(variable)
+            cmd = new Command()
+            cmd.insertAtEndOfFile(code)
