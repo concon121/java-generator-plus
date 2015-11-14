@@ -18,6 +18,10 @@
             {
                 'label': 'toString'
                 'command': 'java-generator:generate-to-string'
+            },
+            {
+                'label': 'Builder'
+                'command': 'java-generator:generate-builder'
             }
         ]
     ]
@@ -43,6 +47,10 @@
                 {
                     'label': 'toString'
                     'command': 'java-generator:generate-to-string'
+                },
+                {
+                    'label': 'Builder'
+                    'command': 'java-generator:generate-builder'
                 }
             ]
         ]

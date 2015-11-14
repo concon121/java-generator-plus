@@ -8,6 +8,7 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-setters', => @generateSetters()
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-builder', => @generateBuilder()
 
     parseVars: (removeFinalVars, removeStaticVars) ->
         cmd = new Command()
@@ -92,6 +93,35 @@ module.exports =
 
         return code
 
+    createBuilder: (data) ->
+        cmd = new Command()
+        parser = new Parser()
+        parser.setContent(cmd.getEditorText())
+        className = parser.getClassName()
+
+        code = "\n\tpublic static class Builder {"
+
+        for variable in data
+            name = variable.getName()
+            type = variable.getType()
+            code += "\n\t\t private static "+ type + " " + name + ";"
+
+        for variable in data
+            name = variable.getName()
+            type = variable.getType()
+
+            code += "\n\n\t\t public static Builder " + name + "("
+            code += type + " " + name +  "){"
+
+            code += "\n\t\t\t this." + name + " = " + name + ";"
+            code += "\n\t\t\t return this;"
+            code += "\n\t\t}"
+
+        code += "\n\n\t\tpublic " + className + " create(){"
+        code += "\n\n\t\t}"
+        code += "\n\t}\n"
+        return code
+
     createConstructor: (data) ->
         cmd = new Command()
         parser = new Parser()
@@ -173,5 +203,17 @@ module.exports =
         data = @parseVars(true, true)
 
         code = @createConstructor(data)
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
+
+    generateBuilder: ->
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true, true)
+
+        code = @createBuilder(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)

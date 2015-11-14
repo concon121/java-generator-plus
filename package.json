@@ -25,7 +25,8 @@
       "java-generator:generate-getters",
       "java-generator:generate-setters",
       "java-generator:generate-constructor",
-      "java-generator:generate-to-string"
+      "java-generator:generate-to-string",
+      "java-generator:generate-builder"
     ]
   },
   "keywords": [
