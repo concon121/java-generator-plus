@@ -171,10 +171,12 @@ module.exports =
 
         data = @parseVars(false, false)
 
+        code = ""
         for variable in data
-            code = @createGetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
+            code += @createGetter(variable)
+
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
 
     generateSetters: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -184,10 +186,12 @@ module.exports =
 
         data = @parseVars(true, false)
 
+        code = ""
         for variable in data
-            code = @createSetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
+            code += @createSetter(variable)
+
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
 
     generateToString: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -233,7 +237,9 @@ module.exports =
 
         data = @parseVars(true, true)
 
+        code = ""
         for variable in data
-            code = @createGetterAndSetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
+            code += @createGetterAndSetter(variable)
+
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
