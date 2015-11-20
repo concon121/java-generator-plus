@@ -41,7 +41,12 @@ module.exports =
         return data
 
     createGetter: (variable) ->
-        code = "\n\tpublic "
+        code = ""
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t*\n\t*@return\n\t*/"
+
+        code += "\n\tpublic "
 
         if variable.getIsStatic()
             code += "static "
@@ -53,7 +58,12 @@ module.exports =
         return code
 
     createSetter: (variable) ->
-        code = "\n\tpublic "
+        code = ""
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t*\n\t*@param\n\t*/"
+
+        code += "\n\tpublic "
 
         if variable.getIsStatic()
             code += "static "
@@ -240,11 +250,15 @@ module.exports =
         data = @parseVars(true, true)
 
         code = ""
-        for variable in data
+        if atom.config.get('java-generator.toggles.generateGettersThenSetters')
+            @generateGetters(variable)
+            @generateSetters(variable)
+        else
+          for variable in data
             code += @createGetterAndSetter(variable)
+            cmd = new Command()
+            cmd.insertAtEndOfFile(code)
 
-        cmd = new Command()
-        cmd.insertAtEndOfFile(code)
 
     config:
       toggles:
@@ -253,5 +267,15 @@ module.exports =
         properties:
           appendThisToGetters:
             title: 'Append \'this\' to Getters'
+            description: 'Return satements look like `return this.param`'
             type: 'boolean'
             default: false
+          generateGettersThenSetters:
+            title: 'Generate Getters then Setters'
+            type: 'boolean'
+            default: false
+          generateMethodComments:
+            title: 'Generate Method Comments'
+            description: 'Generate default method comments'
+            type: 'boolean'
+            default: true
