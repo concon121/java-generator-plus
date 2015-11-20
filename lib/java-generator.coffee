@@ -46,7 +46,9 @@ module.exports =
         if variable.getIsStatic()
             code += "static "
 
-        code += variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn " + variable.getName() + ";\n\t}\n"
+        code += variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn "
+        if atom.config.get('java-generator.toggles.appendThisToGetters') then code += "this."
+        code += variable.getName() + ";\n\t}\n"
 
         return code
 
@@ -243,3 +245,13 @@ module.exports =
 
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
+
+    config:
+      toggles:
+        type: 'object'
+        order: 1
+        properties:
+          appendThisToGetters:
+            title: 'Append \'this\' to Getters'
+            type: 'boolean'
+            default: false
