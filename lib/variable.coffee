@@ -6,7 +6,6 @@ class Variable
     isStatic: false
     isFinal: false
 
-    #TODO - transient/volatile
     constructor: (name, type, isStatic, isFinal) ->
         @name = name
         @capitalizedName = name.charAt(0).toUpperCase() + name.substring(1, name.length)

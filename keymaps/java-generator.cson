@@ -8,8 +8,7 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
 'atom-text-editor':
-  'ctrl-alt-g': 'java-generator:generate-getters'
-  'ctrl-alt-s': 'java-generator:generate-setters'
+  'ctrl-alt-g': 'java-generator:generate-getters-setters'
   'ctrl-alt-c': 'java-generator:generate-constructor'
   'ctrl-alt-t': 'java-generator:generate-to-string'
   'ctrl-alt-b': 'java-generator:generate-builder'

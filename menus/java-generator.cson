@@ -4,20 +4,12 @@
         label: 'Java Generator',
         submenu: [
             {
-                'label': 'Constructor'
-                'command': 'java-generator:generate-constructor'
-            },
-            {
-                'label': 'Getters'
-                'command': 'java-generator:generate-getters'
-            },
-            {
-                'label': 'Setters'
-                'command': 'java-generator:generate-setters'
-            },
-            {
                 'label': 'Getters and Setters'
                 'command': 'java-generator:generate-getters-setters'
+            },
+            {
+                'label': 'Constructor'
+                'command': 'java-generator:generate-constructor'
             },
             {
                 'label': 'toString'
@@ -37,20 +29,12 @@
             'label': 'Java Generator'
             'submenu': [
                 {
-                    'label': 'Constructor'
-                    'command': 'java-generator:generate-constructor'
-                },
-                {
-                    'label': 'Getters'
-                    'command': 'java-generator:generate-getters'
-                },
-                {
-                    'label': 'Setters'
-                    'command': 'java-generator:generate-setters'
-                },
-                {
                     'label': 'Getters and Setters'
                     'command': 'java-generator:generate-getters-setters'
+                },
+                {
+                    'label': 'Constructor'
+                    'command': 'java-generator:generate-constructor'
                 },
                 {
                     'label': 'toString'

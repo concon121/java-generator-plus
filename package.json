@@ -3,7 +3,7 @@
   "main": "./lib/java-generator",
   "version": "2.0.0",
   "private": true,
-  "description": "Generates getter, setter, toString, and constructor methods for java classes.",
+  "description": "Generates getter, setter, toString, constructor, and builder methods for java classes.",
   "repository": {
     "type": "git",
     "url": "https://github.com/delebota/java-generator"
@@ -22,8 +22,6 @@
   "dependencies": {},
   "activationCommands": {
     "atom-workspace": [
-      "java-generator:generate-getters",
-      "java-generator:generate-setters",
       "java-generator:generate-constructor",
       "java-generator:generate-to-string",
       "java-generator:generate-builder",
@@ -42,6 +40,7 @@
     "generate",
     "format",
     "auto",
-    "automatic"
+    "automatic",
+    "builder"
   ]
 }

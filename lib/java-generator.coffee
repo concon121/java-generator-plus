@@ -4,12 +4,10 @@ Parser = require './parser'
 module.exports =
     activate: ->
         # Register commands
-        atom.commands.add 'atom-workspace', 'java-generator:generate-getters', => @generateGetters()
-        atom.commands.add 'atom-workspace', 'java-generator:generate-setters', => @generateSetters()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-getters-setters', => @generateGettersAndSetters()
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
         atom.commands.add 'atom-workspace', 'java-generator:generate-builder', => @generateBuilder()
-        atom.commands.add 'atom-workspace', 'java-generator:generate-getters-setters', => @generateGettersAndSetters()
 
     parseVars: (removeFinalVars, removeStaticVars) ->
         cmd = new Command()
@@ -44,7 +42,9 @@ module.exports =
         code = ""
 
         if atom.config.get('java-generator.toggles.generateMethodComments')
-            code += "\n\t/**\n\t*\n\t*@return\n\t*/"
+            code += "\n\t/**\n\t* Returns value of "
+            code += variable.getName()
+            code += "\n\t* @return\n\t*/"
 
         code += "\n\tpublic "
 
@@ -61,7 +61,9 @@ module.exports =
         code = ""
 
         if atom.config.get('java-generator.toggles.generateMethodComments')
-            code += "\n\t/**\n\t*\n\t*@param\n\t*/"
+            code += "\n\t/**\n\t* Sets new value of "
+            code += variable.getName()
+            code += "\n\t* @param\n\t*/"
 
         code += "\n\tpublic "
 
@@ -83,19 +85,32 @@ module.exports =
         return code
 
     createGetterAndSetter: (variable) ->
-        code  = @createGetter(variable)
-        code += @createSetter(variable)
+        # Always make the getter
+        code = @createGetter(variable)
+
+        # Make the setter if it is NOT final
+        if !variable.getIsFinal()
+          code += @createSetter(variable)
 
         return code
 
     createToString: (data) ->
         counter = 0
-        code = "\n\t@Override\n\tpublic String toString() {\n\t\treturn \""
-
+        code = ""
         cmd = new Command()
         parser = new Parser()
         parser.setContent(cmd.getEditorText())
-        code += parser.getClassName() + " ["
+        className = parser.getClassName()
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t* Create string representation of "
+            code += className
+            code += " for printing\n\t* @return\n\t*/"
+
+        code += "\n\t@Override\n\tpublic String toString() {\n\t\treturn \""
+
+        code += className
+        code += " ["
 
         counter = 0;
         size = data.length
@@ -113,12 +128,13 @@ module.exports =
         return code
 
     createBuilder: (data) ->
+        code = "";
         cmd = new Command()
         parser = new Parser()
         parser.setContent(cmd.getEditorText())
         className = parser.getClassName()
 
-        code = "\n\tpublic static class Builder {"
+        code += "\n\tpublic static class Builder {"
 
         for variable in data
             name = variable.getName()
@@ -130,25 +146,36 @@ module.exports =
             type = variable.getType()
 
             code += "\n\n\t\t public static Builder " + name + "("
-            code += type + " " + name +  "){"
+            code += type + " " + name +  ") {"
 
             code += "\n\t\t\t this." + name + " = " + name + ";"
             code += "\n\t\t\t return this;"
             code += "\n\t\t}"
 
-        code += "\n\n\t\tpublic " + className + " create(){"
+        code += "\n\n\t\tpublic " + className + " create() {"
         code += "\n\n\t\t}"
         code += "\n\t}\n"
         return code
 
     createConstructor: (data) ->
+        code = ""
         cmd = new Command()
         parser = new Parser()
         parser.setContent(cmd.getEditorText())
         className = parser.getClassName()
 
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t* Default empty "
+            code += className
+            code += " constructor\n\t*/"
+
         # First, an empty one
-        code = "\n\tpublic " + className + "() {\n\t\tsuper();\n\t}\n"
+        code += "\n\tpublic " + className + "() {\n\t\tsuper();\n\t}\n"
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t* Default "
+            code += className
+            code += " constructor\n\t*/"
 
         # Second, one with all variables
         code += "\n\tpublic " + className + "("
@@ -247,18 +274,18 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
-        data = @parseVars(true, true)
+        data = @parseVars(false, false)
 
-        code = ""
         if atom.config.get('java-generator.toggles.generateGettersThenSetters')
-            @generateGetters(variable)
-            @generateSetters(variable)
+            @generateGetters()
+            @generateSetters()
         else
+          code = ""
           for variable in data
             code += @createGetterAndSetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
 
+          cmd = new Command()
+          cmd.insertAtEndOfFile(code)
 
     config:
       toggles:
@@ -272,6 +299,7 @@ module.exports =
             default: false
           generateGettersThenSetters:
             title: 'Generate Getters then Setters'
+            description: 'Generates all Getters then all Setters instead of grouping them together.'
             type: 'boolean'
             default: false
           generateMethodComments:
