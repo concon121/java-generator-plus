@@ -12,3 +12,4 @@
   'ctrl-alt-s': 'java-generator:generate-setters'
   'ctrl-alt-c': 'java-generator:generate-constructor'
   'ctrl-alt-t': 'java-generator:generate-to-string'
+  'ctrl-alt-b': 'java-generator:generate-builder'

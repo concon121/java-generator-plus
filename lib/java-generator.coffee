@@ -8,6 +8,8 @@ module.exports =
         atom.commands.add 'atom-workspace', 'java-generator:generate-setters', => @generateSetters()
         atom.commands.add 'atom-workspace', 'java-generator:generate-constructor', => @generateConstructor()
         atom.commands.add 'atom-workspace', 'java-generator:generate-to-string', => @generateToString()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-builder', => @generateBuilder()
+        atom.commands.add 'atom-workspace', 'java-generator:generate-getters-setters', => @generateGettersAndSetters()
 
     parseVars: (removeFinalVars, removeStaticVars) ->
         cmd = new Command()
@@ -39,17 +41,29 @@ module.exports =
         return data
 
     createGetter: (variable) ->
-        code = "\n\tpublic "
+        code = ""
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t*\n\t*@return\n\t*/"
+
+        code += "\n\tpublic "
 
         if variable.getIsStatic()
             code += "static "
 
-        code += variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn " + variable.getName() + ";\n\t}\n"
+        code += variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn "
+        if atom.config.get('java-generator.toggles.appendThisToGetters') then code += "this."
+        code += variable.getName() + ";\n\t}\n"
 
         return code
 
     createSetter: (variable) ->
-        code = "\n\tpublic "
+        code = ""
+
+        if atom.config.get('java-generator.toggles.generateMethodComments')
+            code += "\n\t/**\n\t*\n\t*@param\n\t*/"
+
+        code += "\n\tpublic "
 
         if variable.getIsStatic()
             code += "static "
@@ -65,6 +79,12 @@ module.exports =
             code += "this."
 
         code += variable.getName() + " = " + variable.getName() + ";\n\t}\n"
+
+        return code
+
+    createGetterAndSetter: (variable) ->
+        code  = @createGetter(variable)
+        code += @createSetter(variable)
 
         return code
 
@@ -90,6 +110,35 @@ module.exports =
 
             counter++
 
+        return code
+
+    createBuilder: (data) ->
+        cmd = new Command()
+        parser = new Parser()
+        parser.setContent(cmd.getEditorText())
+        className = parser.getClassName()
+
+        code = "\n\tpublic static class Builder {"
+
+        for variable in data
+            name = variable.getName()
+            type = variable.getType()
+            code += "\n\t\t private static "+ type + " " + name + ";"
+
+        for variable in data
+            name = variable.getName()
+            type = variable.getType()
+
+            code += "\n\n\t\t public static Builder " + name + "("
+            code += type + " " + name +  "){"
+
+            code += "\n\t\t\t this." + name + " = " + name + ";"
+            code += "\n\t\t\t return this;"
+            code += "\n\t\t}"
+
+        code += "\n\n\t\tpublic " + className + " create(){"
+        code += "\n\n\t\t}"
+        code += "\n\t}\n"
         return code
 
     createConstructor: (data) ->
@@ -134,10 +183,12 @@ module.exports =
 
         data = @parseVars(false, false)
 
+        code = ""
         for variable in data
-            code = @createGetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
+            code += @createGetter(variable)
+
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
 
     generateSetters: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -147,10 +198,12 @@ module.exports =
 
         data = @parseVars(true, false)
 
+        code = ""
         for variable in data
-            code = @createSetter(variable)
-            cmd = new Command()
-            cmd.insertAtEndOfFile(code)
+            code += @createSetter(variable)
+
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
 
     generateToString: ->
         editor = atom.workspace.getActiveTextEditor()
@@ -175,3 +228,54 @@ module.exports =
         code = @createConstructor(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
+
+    generateBuilder: ->
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true, true)
+
+        code = @createBuilder(data)
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
+
+    generateGettersAndSetters: ->
+        editor = atom.workspace.getActiveTextEditor()
+        unless editor.getGrammar().scopeName is 'text.java' or editor.getGrammar().scopeName is 'source.java'
+            alert ('This command is meant for java files only.')
+            return
+
+        data = @parseVars(true, true)
+
+        code = ""
+        if atom.config.get('java-generator.toggles.generateGettersThenSetters')
+            @generateGetters(variable)
+            @generateSetters(variable)
+        else
+          for variable in data
+            code += @createGetterAndSetter(variable)
+            cmd = new Command()
+            cmd.insertAtEndOfFile(code)
+
+
+    config:
+      toggles:
+        type: 'object'
+        order: 1
+        properties:
+          appendThisToGetters:
+            title: 'Append \'this\' to Getters'
+            description: 'Return satements look like `return this.param`'
+            type: 'boolean'
+            default: false
+          generateGettersThenSetters:
+            title: 'Generate Getters then Setters'
+            type: 'boolean'
+            default: false
+          generateMethodComments:
+            title: 'Generate Method Comments'
+            description: 'Generate default method comments'
+            type: 'boolean'
+            default: true
