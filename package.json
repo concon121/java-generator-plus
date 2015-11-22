@@ -1,7 +1,7 @@
 {
   "name": "java-generator",
   "main": "./lib/java-generator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Generates getter, setter, toString, constructor, and builder methods for java classes.",
   "repository": {
