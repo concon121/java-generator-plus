@@ -17,8 +17,10 @@ class Parser
         return @content
 
     getVars: ->
+        # Find lines with variables
         varLines = @content.match(@varRegexArray)
 
+        # Check if any were found
         if ! varLines
             alert ('No variables were found.')
             return {}
@@ -32,17 +34,21 @@ class Parser
                     isStatic = false
                     isFinal = false
 
+                    # Check if static
                     if group[2] != null && @staticRegex.test(group[2])
                         isStatic = true
 
+                    # Check if final
                     if group[3] != null && @finalRegex.test(group[3])
                         isFinal = true
 
+                    # Create variable and store it
                     variable = new Variable(group[6], group[5], isStatic, isFinal)
                     variables.push (variable)
 
         return variables
 
     getClassName: ->
+        # Find class name and return it
         match = @content.match(@classNameRegex)
         return match[1]

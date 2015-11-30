@@ -1,3 +1,7 @@
+## 2.1.1 - Enhancements
+* Added code documentation
+* Boolean values now use 'is' prefix instead of 'get' in getter generation.
+
 ## 2.1.0 - Enhancements
 * Added Builder Generator
 * Merged Getter and Setter Generator

@@ -41,17 +41,28 @@ module.exports =
     createGetter: (variable) ->
         code = ""
 
+        # Make method comments
         if atom.config.get('java-generator.toggles.generateMethodComments')
             code += "\n\t/**\n\t* Returns value of "
             code += variable.getName()
             code += "\n\t* @return\n\t*/"
 
+        # Make public
         code += "\n\tpublic "
 
+        # Check if it should be static
         if variable.getIsStatic()
             code += "static "
 
-        code += variable.getType() + " get" + variable.getCapitalizedName() + "() {\n\t\treturn "
+        # Use 'is' if boolean, otherwise 'get'
+        code += variable.getType()
+        if variable.getType() == "boolean"
+            code += " is"
+        else
+             code += " get"
+
+        # Finish method name and return
+        code += variable.getCapitalizedName() + "() {\n\t\treturn "
         if atom.config.get('java-generator.toggles.appendThisToGetters') then code += "this."
         code += variable.getName() + ";\n\t}\n"
 
@@ -60,18 +71,23 @@ module.exports =
     createSetter: (variable) ->
         code = ""
 
+        # Make method comments
         if atom.config.get('java-generator.toggles.generateMethodComments')
             code += "\n\t/**\n\t* Sets new value of "
             code += variable.getName()
             code += "\n\t* @param\n\t*/"
 
+        # Make public
         code += "\n\tpublic "
 
+        # Check if  it should be static
         if variable.getIsStatic()
             code += "static "
 
+        # Method signature
         code += "void set" + variable.getCapitalizedName() + "(" + variable.getType() + " " + variable.getName() + ") {\n\t\t"
 
+        # Append class or this to variable name
         if variable.getIsStatic()
             cmd = new Command()
             parser = new Parser()
@@ -80,6 +96,7 @@ module.exports =
         else
             code += "this."
 
+        # Put in variable name and finish method
         code += variable.getName() + " = " + variable.getName() + ";\n\t}\n"
 
         return code
@@ -102,16 +119,19 @@ module.exports =
         parser.setContent(cmd.getEditorText())
         className = parser.getClassName()
 
+        # Make method comments
         if atom.config.get('java-generator.toggles.generateMethodComments')
             code += "\n\t/**\n\t* Create string representation of "
             code += className
             code += " for printing\n\t* @return\n\t*/"
 
+        # Method signature
         code += "\n\t@Override\n\tpublic String toString() {\n\t\treturn \""
 
         code += className
         code += " ["
 
+        # List out variables
         counter = 0;
         size = data.length
         for variable in data
@@ -134,13 +154,16 @@ module.exports =
         parser.setContent(cmd.getEditorText())
         className = parser.getClassName()
 
+        # Class signature
         code += "\n\tpublic static class Builder {"
 
+        # Variables
         for variable in data
             name = variable.getName()
             type = variable.getType()
-            code += "\n\t\t private static "+ type + " " + name + ";"
+            code += "\n\t\t private static " + type + " " + name + ";"
 
+        # Variable related methods
         for variable in data
             name = variable.getName()
             type = variable.getType()
@@ -152,6 +175,7 @@ module.exports =
             code += "\n\t\t\t return this;"
             code += "\n\t\t}"
 
+        # create() method
         code += "\n\n\t\tpublic " + className + " create() {"
         code += "\n\n\t\t}"
         code += "\n\t}\n"
@@ -164,6 +188,7 @@ module.exports =
         parser.setContent(cmd.getEditorText())
         className = parser.getClassName()
 
+        # Make method comments
         if atom.config.get('java-generator.toggles.generateMethodComments')
             code += "\n\t/**\n\t* Default empty "
             code += className
@@ -172,6 +197,7 @@ module.exports =
         # First, an empty one
         code += "\n\tpublic " + className + "() {\n\t\tsuper();\n\t}\n"
 
+        # Make method comments
         if atom.config.get('java-generator.toggles.generateMethodComments')
             code += "\n\t/**\n\t* Default "
             code += className
@@ -208,12 +234,15 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(false, false)
 
+        # Make getter method
         code = ""
         for variable in data
             code += @createGetter(variable)
 
+        # Insert code
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
 
@@ -223,12 +252,15 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(true, false)
 
+        # Make setter method
         code = ""
         for variable in data
             code += @createSetter(variable)
 
+        # Insert code
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
 
@@ -238,8 +270,10 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(false, true)
 
+        # Make code and insert it
         code = @createToString(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
@@ -250,8 +284,10 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(true, true)
 
+        # Make code and insert it
         code = @createConstructor(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
@@ -262,8 +298,10 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(true, true)
 
+        # Make code and insert it
         code = @createBuilder(data)
         cmd = new Command()
         cmd.insertAtEndOfFile(code)
@@ -274,8 +312,10 @@ module.exports =
             alert ('This command is meant for java files only.')
             return
 
+        # Parse variables
         data = @parseVars(false, false)
 
+        # Generate code
         if atom.config.get('java-generator.toggles.generateGettersThenSetters')
             @generateGetters()
             @generateSetters()
@@ -284,8 +324,9 @@ module.exports =
           for variable in data
             code += @createGetterAndSetter(variable)
 
-          cmd = new Command()
-          cmd.insertAtEndOfFile(code)
+        # Insert code
+        cmd = new Command()
+        cmd.insertAtEndOfFile(code)
 
     config:
       toggles:
